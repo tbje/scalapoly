@@ -162,7 +162,7 @@ object WebUI {
       p <- g.players
       (s, houses) <- p.properties
     } yield s -> (p, houses))(collection.breakOut)
-    g.squares.zipWithIndex map {
+    g.board.zipWithIndex map {
       case (s, i) => new SquareDecorator {
         val houses = s match {
           case p: Property =>

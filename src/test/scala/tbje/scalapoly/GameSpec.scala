@@ -3,25 +3,25 @@ package tbje.scalapoly
 import org.specs2.matcher.Matchers
 import org.specs2.mutable._
 
-class GameSpec extends Specification with Matchers with Squares {
+class GameSpec extends Specification with Matchers with Board {
   //      squares.zipWithIndex foreach { case (s : Street, i) => println(s"$i - $s ${s.color}"); case _ =>  }
-  def createOwner(street: Int, houses: Int = 0) = squares(street) -> houses
+  def createOwner(street: Int, houses: Int = 0) = board(street) -> houses
 
   "Game.ownedInColor" should {
     "return correct values for one yellow (one)" in {
-      Game.ownedInColor(Player("", Map(createOwner(26, 2))), Colors.Yellow) === Map(squares(26) -> 2)
+      Game.ownedInColor(Player("", Map(createOwner(26, 2))), Colors.Yellow) === Map(board(26) -> 2)
     }
     "return correct values for one yellow (three)" in {
-      Game.ownedInColor(Player("", Map(createOwner(26, 2), createOwner(27, 2), createOwner(29, 2))), Colors.Yellow) === Map(squares(26) -> 2, squares(27) -> 2, squares(29) -> 2)
+      Game.ownedInColor(Player("", Map(createOwner(26, 2), createOwner(27, 2), createOwner(29, 2))), Colors.Yellow) === Map(board(26) -> 2, board(27) -> 2, board(29) -> 2)
     }
     "return correct values for one lightBlue (none)" in {
-      Game.ownedInColor(Player("", Map(squares(26) -> 0)), Colors.LightBlue) === Map()
+      Game.ownedInColor(Player("", Map(board(26) -> 0)), Colors.LightBlue) === Map()
     }
   }
 
   "Game.placeEvenly" should {
     "return correct values for 5 houses on 26 yellow (three)" in {
-      Game.updateEvenly(Game.insertEvenly)(Player("", Map(createOwner(26, 0), createOwner(27, 1), createOwner(29, 0))), squares(26).asInstanceOf[Street], 5) === Map(squares(26) -> 2, squares(27) -> 2, squares(29) -> 2)
+      Game.updateEvenly(Game.insertEvenly)(Player("", Map(createOwner(26, 0), createOwner(27, 1), createOwner(29, 0))), board(26).asInstanceOf[Street], 5) === Map(board(26) -> 2, board(27) -> 2, board(29) -> 2)
     }
   }
 

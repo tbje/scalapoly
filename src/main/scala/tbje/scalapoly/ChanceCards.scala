@@ -8,7 +8,7 @@ object Card {
   }
 }
 
-trait ChanceCards extends Squares {
+trait ChanceCards extends Board {
   val chanceCards = Seq(
     Card("Advance to Go (Collect $200).", u => u.copy(balance = u.balance + 200, position = 0)),
     Card("Bank error in your favor – collect $75.", u => u.copy(balance = u.balance + 75)),

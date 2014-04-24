@@ -7,11 +7,11 @@ object ScalapolyJsonProtocol extends DefaultJsonProtocol {
   implicit object SquareJsonFormat extends RootJsonFormat[Square] {
     val IntReq = """(\d*)""".r
     def write(c: Square) =
-      JsString(Game.squares.indexOf(c).toString)
+      JsString(Game.board.indexOf(c).toString)
 
     def read(value: JsValue) = value match {
       case JsString(IntReq(squareId)) =>
-        Game.squares(squareId.toInt)
+        Game.board(squareId.toInt)
       case _ => deserializationError("Color expected")
     }
   }

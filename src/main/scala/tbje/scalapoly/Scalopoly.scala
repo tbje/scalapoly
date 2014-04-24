@@ -16,7 +16,7 @@ object NormalGame extends App {
   Game.init()
 }
 
-object Game extends Squares with ChanceCards {
+object Game extends Board with ChanceCards {
   type Hook = Game => Unit
   val Empty = Game(Seq(Player("Dummy")))
 
@@ -40,7 +40,7 @@ object Game extends Squares with ChanceCards {
 
   def newGame(implicit hook: Hook) = play(Game(util.Random.shuffle(getPlayers()).map(Player(_))))
 
-  val streetsPerColor = squares.collect { case s: Street => s } groupBy (_.color) map { case (a, b) => a -> b.length }
+  val streetsPerColor = board.collect { case s: Street => s } groupBy (_.color) map { case (a, b) => a -> b.length }
 
   val housePrices = Map(Brown -> 50, LightBlue -> 50, Pink -> 100, Orange -> 100, Red -> 150, Yellow -> 150, Green -> 200, DarkBlue -> 200)
 
@@ -48,7 +48,7 @@ object Game extends Squares with ChanceCards {
 
   def play(g: Game)(implicit hook: Game => Unit = g => ()): Game = {
     hook(g)
-    readLine(s"${g.player.name} you're at ${squares(g.player.position)} your balance is ${g.player.balance}$$ > ") match {
+    readLine(s"${g.player.name} you're at ${board(g.player.position)} your balance is ${g.player.balance}$$ > ") match {
       case "s" =>
         g.stats
         play(g)
@@ -92,7 +92,7 @@ object Game extends Squares with ChanceCards {
       }
     } else {
       if (doubles == 2 && first == second) {
-        user.copy(position = squares.indexOf(VisitingJail), prisonTimeLeft = 3) -> false
+        user.copy(position = board.indexOf(VisitingJail), prisonTimeLeft = 3) -> false
       } else {
         normalMove(user, first, second) -> (first == second)
       }
@@ -127,8 +127,8 @@ object Game extends Squares with ChanceCards {
 
   def updateEvenly(f: (Int, Int, Map[Int, Int]) => Map[Int, Int])(player: Player, street: Street, houses: Int): Map[Square, Int] = {
     val owned = ownedInColor(player, street.color)
-    val res: Map[Int, Int] = f(squares.indexOf(street), houses, owned.map(x => squares.indexOf(x._1) -> x._2))
-    val removals = res.map(x => squares(x._1) -> x._2)
+    val res: Map[Int, Int] = f(board.indexOf(street), houses, owned.map(x => board.indexOf(x._1) -> x._2))
+    val removals = res.map(x => board(x._1) -> x._2)
     player.properties ++ removals
   }
 
@@ -157,7 +157,7 @@ object Game extends Squares with ChanceCards {
     try { block(r) } finally r.close()
 }
 
-case class Game(players: Seq[Player], turn: Int = 0, doubleCount: Int = 0) extends Squares {
+case class Game(players: Seq[Player], turn: Int = 0, doubleCount: Int = 0) extends Board {
   import Game._
   val playerIndex = turn % players.length
   val player = players(playerIndex)
@@ -211,7 +211,7 @@ case class Game(players: Seq[Player], turn: Int = 0, doubleCount: Int = 0) exten
               case 1 => "with 1 house" -> s"$buyStr (s)ell"
               case x => s"with $x houses" -> s"$buyStr (s)ell"
             }
-            println(s"  $s $status: ${squares.indexOf(s)} $buy")
+            println(s"  $s $status: ${board.indexOf(s)} $buy")
         }
     }
     val Mortgage = """(\d{1,2}) m""".r
@@ -220,7 +220,7 @@ case class Game(players: Seq[Player], turn: Int = 0, doubleCount: Int = 0) exten
     def repeat: Game = {
       readLine("[square-id] [operation] [number] ie. 23 b 3 -> square 23, buy 3 houses > ") match {
         case Mortgage(id) =>
-          squares.lift(id.toInt) match {
+          board.lift(id.toInt) match {
             case Some(street: Property) if player.properties.contains(street) =>
               println(s"  $street mortgaged, you have ${player.balance + street.mortgage}$$ in the bank.")
               Game(players.replace(player, p => p.copy(balance = p.balance + street.mortgage, properties = p.properties + (street -> -1))), turn, doubleCount)
@@ -232,7 +232,7 @@ case class Game(players: Seq[Player], turn: Int = 0, doubleCount: Int = 0) exten
           }
         case Buy(id, number) =>
           val houses = number.toInt
-          squares.lift(id.toInt) match {
+          board.lift(id.toInt) match {
             case Some(street: Street) =>
               canBuyHouses(player, street) match {
                 case None =>
@@ -281,15 +281,15 @@ case class Game(players: Seq[Player], turn: Int = 0, doubleCount: Int = 0) exten
     val first, second = dice
     val (afterDice, double) = Game.move(player, first, second, doubleCount)
     hook(this.copy(players.replace(player, _ => afterDice)))
-    println(s"  ${player.name}, you diced $first, $second and are now at ${squares(afterDice.position)}.")
-    val newPlayers = squares(afterDice.position).onArrival(first + second, afterDice, players.updated(playerIndex, afterDice))
+    println(s"  ${player.name}, you diced $first, $second and are now at ${board(afterDice.position)}.")
+    val newPlayers = board(afterDice.position).onArrival(first + second, afterDice, players.updated(playerIndex, afterDice))
     val g = if (double) Game(newPlayers, turn, doubleCount + 1) else Game(newPlayers, turn + 1)
     g
   }
 
   def stats = {
     players foreach { p =>
-      println(s"${p.name} is at ${squares(p.position)} and has ${p.balance}$$")
+      println(s"${p.name} is at ${board(p.position)} and has ${p.balance}$$")
       for {
         (square, houses) <- p.properties
       } println(s"  owns $square with $houses houses.")
