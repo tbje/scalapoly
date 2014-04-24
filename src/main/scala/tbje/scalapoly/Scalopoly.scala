@@ -1,6 +1,8 @@
 package tbje.scalapoly
 
 import util.Random
+import java.io.PrintWriter
+import scala.io.Source
 
 case class Player(name: String, properties: Map[Square, Int] = Map(), position: Int = 0, balance: Int = 1500,
   prisonTimeLeft: Int = 0, insurrance: Boolean = false, outOfPrison: Boolean = false)
@@ -101,9 +103,20 @@ object Game extends Squares with ChanceCards {
     import ScalapolyJsonProtocol._
     import spray.json._
     try {
-      val parsed = JsonParser(readLine("paste:"))
-      val g = parsed.convertTo[Game]
-      play(g)
+      def jsonToGame(json: String) = {
+        val parsed = JsonParser(json)
+        val g = parsed.convertTo[Game]
+        play(g)
+      }
+      val f = new java.io.File("savegame")
+      if (f.exists && f.isFile) {
+        jsonToGame(Source.fromFile(f).getLines().mkString("\n"))
+      } else {
+        readLine("Paste some valid json to load game (q - to quit): ") match {
+          case "q" => init
+          case json => jsonToGame(json)
+        }
+      }
     } catch {
       case e: Exception => load(hook)
     }
@@ -134,6 +147,8 @@ object Game extends Squares with ChanceCards {
     placeEvenly(prefered, houses - 1, allNext)
   }
 
+  def withResource[T, R <: { def close(): Unit }](r: R)(block: R => T) =
+    try { block(r) } finally r.close()
 }
 
 case class Game(players: Seq[Player], turn: Int = 0, doubleCount: Int = 0) extends Squares {
@@ -144,6 +159,10 @@ case class Game(players: Seq[Player], turn: Int = 0, doubleCount: Int = 0) exten
   def save = {
     import ScalapolyJsonProtocol._
     import spray.json._
+    withResource(new PrintWriter("savegame")) { writer =>
+      writer.println(this.toJson)
+      writer.flush()
+    }
     println(this.toJson)
   }
 
