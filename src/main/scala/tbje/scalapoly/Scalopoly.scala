@@ -8,7 +8,6 @@ case class Player(name: String, properties: Map[Square, Int] = Map(), position: 
 object Colors extends Enumeration {
   val Brown, LightBlue, Pink, Orange, Red, Yellow, Green, DarkBlue = Value
 }
-
 import Colors._
 
 object NormalGame extends App {
@@ -18,7 +17,7 @@ object NormalGame extends App {
 object Game extends Squares with ChanceCards {
 
   def getPlayers(): Seq[String] = {
-    val Number = """(\d)""".r
+    val Number = """([1-6])""".r
     readLine("Nb. of players (1-6)?: ") match {
       case Number(nb) =>
         (1 to nb.toInt) map { i => readLine(s"Name player $i?: ") }
