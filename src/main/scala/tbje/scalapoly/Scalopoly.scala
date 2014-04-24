@@ -207,15 +207,15 @@ case class Game(players: Seq[Player], turn: Int = 0, doubleCount: Int = 0) exten
             println(s"  $s $status: ${squares.indexOf(s)} $buy")
         }
     }
-    val Mortage = """(\d{1,2}) m""".r
+    val Mortgage = """(\d{1,2}) m""".r
     val Buy = """(\d{1,2}) b (\d{1,2})""".r
     val Sell = """(\d{1,2}) s (\d{1,2})""".r
     def repeat: Game = {
       readLine("(id) > ") match {
-        case Mortage(id) =>
+        case Mortgage(id) =>
           squares.lift(id.toInt) match {
             case Some(street: Property) if player.properties.contains(street) =>
-              println(s"  $street mortaged, you have ${player.balance + street.mortgage}$$ in the bank.")
+              println(s"  $street mortgaged, you have ${player.balance + street.mortgage}$$ in the bank.")
               Game(players.replace(player, p => p.copy(balance = p.balance + street.mortgage, properties = p.properties + (street -> -1))), turn, doubleCount)
             case Some(street: Property) =>
               println(s"  you don't own $street"); repeat
