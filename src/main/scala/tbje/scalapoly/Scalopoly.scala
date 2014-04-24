@@ -125,27 +125,33 @@ object Game extends Squares with ChanceCards {
   def ownedInColor(player: Player, color: Colors.Value): Map[Street, Int] =
     player.properties.collect { case (street @ Street(_, `color`, _, _, _), houses) => street -> houses }
 
-  def placeEvenly(player: Player, street: Street, houses: Int): Map[Square, Int] = {
+  def updateEvenly(f: (Int, Int, Map[Int, Int]) => Map[Int, Int])(player: Player, street: Street, houses: Int): Map[Square, Int] = {
     val owned = ownedInColor(player, street.color)
-    val res: Map[Int, Int] = placeEvenly(squares.indexOf(street), houses, owned.map(x => squares.indexOf(x._1) -> x._2))
-    val additions = res.map(x => squares(x._1) -> x._2)
-    player.properties ++ additions
+    val res: Map[Int, Int] = f(squares.indexOf(street), houses, owned.map(x => squares.indexOf(x._1) -> x._2))
+    val removals = res.map(x => squares(x._1) -> x._2)
+    player.properties ++ removals
   }
 
-  def placeEvenly(prefered: Int, houses: Int, all: Map[Int, Int]): Map[Int, Int] = if (houses == 0) all else {
-    val highestIndexAfterPrefered = (all - prefered).keys.max
-    def incremented(key: Int) = key -> (all(key) + 1)
-    val mostHouses = all.values.max
-    val allSame = all.values.forall(_ == mostHouses)
-    val allNext = if (allSame || all(prefered) != all(highestIndexAfterPrefered)) {
-      all + incremented(prefered)
-    } else if (all(prefered) == mostHouses && all(highestIndexAfterPrefered) == mostHouses) {
-      all + incremented((all - prefered - highestIndexAfterPrefered).keys.head)
+  /*
+   * Places or removes houses evenly. 
+   */
+  def xEvenly(decInt: Int => Int, minMax: Traversable[Int] => Int)(prefered: Int, houses: Int, all: Map[Int, Int]): Map[Int, Int] = if (houses == 0) all else {
+    val lowestHeighestIndexAfterPrefered = minMax((all - prefered).keys)
+    def decIncremented(key: Int) = key -> decInt(all(key))
+    val leastMostHouses = minMax(all.values)
+    val allSame = all.values.forall(_ == leastMostHouses)
+    val allNext = if (allSame || all(prefered) != leastMostHouses) {
+      all + decIncremented(prefered)
+    } else if (all(prefered) == leastMostHouses && all(lowestHeighestIndexAfterPrefered) == leastMostHouses) {
+      all + decIncremented((all - prefered - lowestHeighestIndexAfterPrefered).keys.head)
     } else { // if (all(prefered) == max) {
-      all + incremented(highestIndexAfterPrefered)
+      all + decIncremented(lowestHeighestIndexAfterPrefered)
     }
-    placeEvenly(prefered, houses - 1, allNext)
+    xEvenly(decInt, minMax)(prefered, houses - 1, allNext)
   }
+
+  def insertEvenly(prefered: Int, houses: Int, all: Map[Int, Int]): Map[Int, Int] = xEvenly(_ + 1, _.max)(prefered, houses, all)
+  def removeEvenly(prefered: Int, houses: Int, all: Map[Int, Int]): Map[Int, Int] = xEvenly(_ - 1, _.min)(prefered, houses, all)
 
   def withResource[T, R <: { def close(): Unit }](r: R)(block: R => T) =
     try { block(r) } finally r.close()
@@ -183,7 +189,8 @@ case class Game(players: Seq[Player], turn: Int = 0, doubleCount: Int = 0) exten
     }
   }
 
-  def placeEvenly(street: Street, houses: Int) = Game.placeEvenly(player, street, houses)
+  def placeEvenly(street: Street, houses: Int) = Game.updateEvenly(Game.insertEvenly)(player, street, houses)
+  def removeEvenly(street: Street, houses: Int) = Game.updateEvenly(Game.removeEvenly)(player, street, houses)
 
   def houseMenu: Game = {
     val userStreets: Seq[(Street, Int)] = player.properties collect { case (s: Street, h) => s -> h } toSeq
@@ -245,7 +252,24 @@ case class Game(players: Seq[Player], turn: Int = 0, doubleCount: Int = 0) exten
               this
             case None => this
           }
-        case Sell(id, number) => this
+        case Sell(id, number) =>
+          val houses = number.toInt
+          board.lift(id.toInt) match {
+            case Some(street: Street) =>
+              canBuyHouses(player, street) match {
+                case None =>
+                  val total = (housePrices(street.color) * houses * 0.9).toInt
+                  Game(players.replace(player, p => p.copy(balance = p.balance + total, properties = removeEvenly(street, houses))), turn, doubleCount)
+                case Some(problem) =>
+                  println(problem)
+                  this
+              }
+            case Some(notStreet) =>
+              println("  Not a valid street")
+              this
+            case None => this
+          }
+
         case "" | "q" => this
         case _ => println("  did not understand"); repeat
       }

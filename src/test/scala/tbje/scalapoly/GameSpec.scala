@@ -21,31 +21,31 @@ class GameSpec extends Specification with Matchers with Squares {
 
   "Game.placeEvenly" should {
     "return correct values for 5 houses on 26 yellow (three)" in {
-      Game.placeEvenly(Player("", Map(createOwner(26, 0), createOwner(27, 1), createOwner(29, 0))), squares(26).asInstanceOf[Street], 5) === Map(squares(26) -> 2, squares(27) -> 2, squares(29) -> 2)
+      Game.updateEvenly(Game.insertEvenly)(Player("", Map(createOwner(26, 0), createOwner(27, 1), createOwner(29, 0))), squares(26).asInstanceOf[Street], 5) === Map(squares(26) -> 2, squares(27) -> 2, squares(29) -> 2)
     }
   }
 
   "Game.placeEvenly" should {
     "return correct values for 5 houses on 26 yellow (three)" in {
-      Game.placeEvenly(2, 0, Map(2 -> 0, 3 -> 0, 4 -> 0)) === Map(2 -> 0, 3 -> 0, 4 -> 0)
+      Game.insertEvenly(2, 0, Map(2 -> 0, 3 -> 0, 4 -> 0)) === Map(2 -> 0, 3 -> 0, 4 -> 0)
     }
     "return correct values for 5 houses on 26 yellow (three)" in {
-      Game.placeEvenly(2, 1, Map(2 -> 0, 3 -> 0, 4 -> 0)) === Map(2 -> 1, 3 -> 0, 4 -> 0)
+      Game.insertEvenly(2, 1, Map(2 -> 0, 3 -> 0, 4 -> 0)) === Map(2 -> 1, 3 -> 0, 4 -> 0)
     }
     "return correct values for 5 houses on 26 yellow (three)" in {
-      Game.placeEvenly(2, 2, Map(2 -> 0, 3 -> 0, 4 -> 0)) === Map(2 -> 1, 3 -> 0, 4 -> 1)
+      Game.insertEvenly(2, 2, Map(2 -> 0, 3 -> 0, 4 -> 0)) === Map(2 -> 1, 3 -> 0, 4 -> 1)
     }
     "return correct values for 5 houses on 26 yellow (three)" in {
-      Game.placeEvenly(2, 3, Map(2 -> 0, 3 -> 0, 4 -> 0)) === Map(2 -> 1, 3 -> 1, 4 -> 1)
+      Game.insertEvenly(2, 3, Map(2 -> 0, 3 -> 0, 4 -> 0)) === Map(2 -> 1, 3 -> 1, 4 -> 1)
     }
     "return correct values for 5 houses on 26 yellow (three)" in {
-      Game.placeEvenly(2, 2, Map(2 -> 0, 3 -> 1, 4 -> 1)) === Map(2 -> 2, 3 -> 1, 4 -> 1)
+      Game.insertEvenly(2, 2, Map(2 -> 0, 3 -> 1, 4 -> 1)) === Map(2 -> 2, 3 -> 1, 4 -> 1)
     }
     "return correct values for 5 houses on 26 yellow (three)" in {
-      Game.placeEvenly(4, 2, Map(2 -> 0, 3 -> 1, 4 -> 1)) === Map(2 -> 1, 3 -> 1, 4 -> 2)
+      Game.insertEvenly(4, 2, Map(2 -> 0, 3 -> 1, 4 -> 1)) === Map(2 -> 1, 3 -> 1, 4 -> 2)
     }
     "return correct values for 5 houses on 26 yellow (three)" in {
-      Game.placeEvenly(4, 9, Map(2 -> 0, 3 -> 1, 4 -> 1)) === Map(2 -> 3, 3 -> 4, 4 -> 4)
+      Game.insertEvenly(4, 9, Map(2 -> 0, 3 -> 1, 4 -> 1)) === Map(2 -> 3, 3 -> 4, 4 -> 4)
     }
   }
 }
