@@ -110,7 +110,7 @@ case object Chance extends Square with ChanceCards {
     val randIndex = util.Random.nextInt(chanceCards.length)
     val card = chanceCards(randIndex)
     println(s"  ${card.text}")
-    players.replace(player, card.f)
+    card.f(player, players)
   }
 }
 
