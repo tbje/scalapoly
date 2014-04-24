@@ -218,7 +218,7 @@ case class Game(players: Seq[Player], turn: Int = 0, doubleCount: Int = 0) exten
     val Buy = """(\d{1,2}) b (\d{1,2})""".r
     val Sell = """(\d{1,2}) s (\d{1,2})""".r
     def repeat: Game = {
-      readLine("(id) > ") match {
+      readLine("[square-id] [operation] [number] ie. 23 b 3 -> square 23, buy 3 houses > ") match {
         case Mortgage(id) =>
           squares.lift(id.toInt) match {
             case Some(street: Property) if player.properties.contains(street) =>
