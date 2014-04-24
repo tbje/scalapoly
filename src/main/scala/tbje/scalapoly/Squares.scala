@@ -50,8 +50,14 @@ case class Street(name: String, color: Colors.Value, cost: Int, override val mor
     rent(houses)
   def welcomeHome(name: String, playerName: String): String =
     s"  Welcome home to $name, $playerName."
-  override def owned(owner: Player, houses: Int, price: Int): String =
-    s"  ${owner.name} owns $name with $houses houses, that will be $price$$ please."
+  override def owned(owner: Player, houses: Int, price: Int): String = houses match {
+    case 0 =>
+      s"  ${owner.name} owns $name. That will be $price$$ please."
+    case 5 =>
+      s"  ${owner.name} owns $name with an hotel, that will be $price$$ please."
+    case x =>
+      s"  ${owner.name} owns $name, with $houses houses, that will be $price$$ please."
+  }
 }
 
 case class Station(name: String) extends Square with Property {
