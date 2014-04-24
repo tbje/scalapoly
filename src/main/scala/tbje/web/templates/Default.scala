@@ -29,7 +29,7 @@ object Default {
   def index =
     template(
       banner ++
-        Div(BS.row, Style(MarginTop(10.px))) {
+        Div(BS.row, Style(MarginTop(10.px), PaddingLeft(30.px))) {
           H3("Start a new console based game") ++
             P("sbt > game") ++
             H3("Start a new game with web ui") ++
@@ -80,7 +80,7 @@ object Default {
               Div(BS.container, Style(PaddingTop(20.px), PaddingBottom(0.px))) {
                 A(Style(Color.Gray, Float.Right), Href("http://www.glyphicons.com"))("glyphicons") ++
                   P(Style(Color.Gray)) {
-                    Copy ++ Nbsp ++ t"Trond Bjerkestrand"
+                    Copy ++ Nbsp ++ t"Trond Bjerkestrand" ++ t" - " ++ A(Href("https://twitter.com/tbjerkes"))("@tbjerkes") ++ t" - " ++ A(Href("https://github.com/tbje/scalapoly"))("Source code") 
                   }
               }
             } ++
