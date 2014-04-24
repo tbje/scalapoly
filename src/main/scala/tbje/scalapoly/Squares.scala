@@ -114,7 +114,7 @@ case object Chance extends Square with ChanceCards {
   }
 }
 
-case object FreeParking extends Square // No rent in next move
+case object FreeParking extends Square
 
 case object Tax extends Square {
   override def onArrival(dice: Int, player: Player, players: Seq[Player]) = {
