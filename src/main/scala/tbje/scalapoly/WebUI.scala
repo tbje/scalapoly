@@ -23,7 +23,7 @@ object WebGame extends App {
 
   contentDivId.css(PaddingTop(100.px), Color.hex("#5E5E5E")).e
 
-  Game.newGame(WebUI.redraw)
+  Game.init(WebUI.redraw)
   Config.system.shutdown()
   Config.system.awaitTermination
 }

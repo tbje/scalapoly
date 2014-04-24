@@ -11,10 +11,12 @@ object Colors extends Enumeration {
 import Colors._
 
 object NormalGame extends App {
-  Game.newGame()
+  Game.init()
 }
 
 object Game extends Squares with ChanceCards {
+  type Hook = Game => Unit
+  val Empty = Game(Seq(Player("Dummy")))
 
   def getPlayers(): Seq[String] = {
     val Number = """([1-6])""".r
@@ -24,8 +26,17 @@ object Game extends Squares with ChanceCards {
       case _ => getPlayers()
     }
   }
+  def init(implicit hook: Hook = g => ()): Game = {
+    readLine("Welcome to Scalapoly - (N)ew game or (L)oad? ").toLowerCase() match {
+      case "l" => load
+      case "n" => newGame
+      case "q" => Empty
+      case _ => init
+    }
 
-  def newGame(implicit hook: Game => Unit = g => ()) = play(Game(util.Random.shuffle(getPlayers()).map(Player(_))))
+  }
+
+  def newGame(implicit hook: Hook) = play(Game(util.Random.shuffle(getPlayers()).map(Player(_))))
 
   val streetsPerColor = squares.collect { case s: Street => s } groupBy (_.color) map { case (a, b) => a -> b.length }
 
@@ -86,7 +97,7 @@ object Game extends Squares with ChanceCards {
     }
   }
 
-  def load(implicit hook: Game => Unit): Game = {
+  def load(implicit hook: Hook): Game = {
     import ScalapolyJsonProtocol._
     import spray.json._
     try {
@@ -223,7 +234,7 @@ case class Game(players: Seq[Player], turn: Int = 0, doubleCount: Int = 0) exten
     repeat
   }
 
-  def next(implicit hook: Game => Unit): Game = {
+  def next(implicit hook: Hook): Game = {
     val first, second = dice
     val (afterDice, double) = Game.move(player, first, second, doubleCount)
     hook(this.copy(players.replace(player, _ => afterDice)))
